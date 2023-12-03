@@ -7,6 +7,7 @@ internal class Program
         Console.WriteLine("Hello, World!");
         string[] lines = File.ReadAllLines(@"C:\Users\jamin\OneDrive\Dokumente\AdventOfCode\3.txt");
         List<int[]> numinfos = new List<int[]>();
+        List<int[]> starInfos = new List<int[]>();
 
         for (int i = 0; i < lines.Length; i++)
         {
@@ -23,7 +24,24 @@ internal class Program
             }
 
         }
+
+        for (int i = 0; i < lines.Length; i++)
+        {
+            string line = lines[i];
+            MatchCollection matches = Regex.Matches(line, @"\*");
+            foreach (Match match in matches)
+            {
+                int[] numInfo = new int[3];
+                numInfo[0] = match.Index;
+
+                numInfo[1] = match.Index ;
+                numInfo[2] = i;
+                starInfos.Add(numInfo);
+            }
+
+        }
         numinfos = numinfos.OrderBy(o => o[0]).OrderBy(o => o[2]).ToList();
+        
         int result = 0;
         foreach(var numinfo in numinfos) {
             if(HasSymbolNeighbor(numinfo,lines))
@@ -33,8 +51,38 @@ internal class Program
         }
 
         Console.WriteLine(result.ToString());
+
+        int result2 = 0;
+        starInfos = starInfos.OrderBy(o => o[0]).OrderBy(o => o[2]).ToList();
+        foreach(var starInfo in starInfos)
+        {
+            result2 += GetGears(starInfo, lines, numinfos);
+        }
+        Console.WriteLine(result2.ToString());
     }
 
+    private static int GetGears(int[] starInfo, string[] lines, List<int[]> numInfos)
+    { 
+        int result = 0;
+        int[][] neighbors = numInfos.Where(o => numIsNeighbor(starInfo, lines, o)).ToArray();
+        if (neighbors.Count() != 2) return 0;
+        return neighbors[0][3] * neighbors[1][3];
+
+    }
+
+    private static bool numIsNeighbor(int[] starInfo, string[] lines, int[] numInfo)
+    {
+        if (Math.Abs(numInfo[2] - starInfo[2]) > 1) return false;
+        int starind = starInfo[0];
+        int numbegin = numInfo[0] > 0 ? numInfo[0]-1 : 0;
+        int numend = numInfo[1] < lines[0].Length-1 ? numInfo[1]+1 : lines[0].Length-1;
+
+        int[] validStars = Enumerable.Range(numbegin,numend - numbegin +1).ToArray();
+        if(validStars.Any(o => o == starind)) return true;
+        return false;
+
+        
+    }
     private static bool HasSymbolNeighbor(int[] numinfo, string[] lines) {
 
         int start = numinfo[0];
@@ -47,7 +95,7 @@ internal class Program
         {
             if (isSymbol(lines[lineNum][start - 1]))
             {
-                Console.WriteLine(numinfo[3] + ": " +lines[lineNum]);
+                //Console.WriteLine(numinfo[3] + ": " +lines[lineNum]);
                 return true;
             }
             
@@ -55,7 +103,7 @@ internal class Program
         if (numinfo[1] +1  < lineLength) {
             if (isSymbol(lines[lineNum][end + 1]))
             {
-                Console.WriteLine(numinfo[3] + ": " + lines[lineNum]);
+                //Console.WriteLine(numinfo[3] + ": " + lines[lineNum]);
                 return true;
             }
         }
@@ -65,7 +113,7 @@ internal class Program
             {
                 if (isSymbol(lines[lineNum - 1][i]))
                 {
-                    Console.WriteLine(numinfo[3] + ": " + lines[lineNum]);
+                   // Console.WriteLine(numinfo[3] + ": " + lines[lineNum]);
                     return true;
                 }
             }
@@ -76,7 +124,7 @@ internal class Program
             {
                 if (isSymbol(lines[lineNum + 1][i]))
                 {
-                    Console.WriteLine(numinfo[3] + ": " + lines[lineNum]);
+                   // Console.WriteLine(numinfo[3] + ": " + lines[lineNum]);
                     return true;
                 }
             }
