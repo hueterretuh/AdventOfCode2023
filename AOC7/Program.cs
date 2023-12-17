@@ -38,24 +38,46 @@ public class Hand : IComparable<Hand>
 
     private void getVal()
     {
+        List<HandVal> hands = new List<HandVal>();
+        var dist = cards.Distinct();
+        if (dist.Any(o => o == 'J'))
+        {
+            foreach(var c in dist)
+            {
+                hands.Add(getVal(cards.Replace('J', c)));
+            }
+            handVal = hands.Max();
+        }
+        else
+        {
+              handVal = getVal(cards);
+        }
+    
+    }
+    private HandVal getVal(string cards)
+    {
+        HandVal handVal;
         if (cards.Distinct().Count() == 1) handVal = HandVal.Five;
         else if (cards.Distinct().Count() == 2)
         {
             char c1 = cards.Distinct().First();
             char c2 = cards.Distinct().Last();
+
             if (cards.Count(o => o == c1) == 1 || (cards.Count(o => o == c1) == 4)) handVal = HandVal.Four;
             else handVal = HandVal.FH;
         }
         else if (cards.Distinct().Count() == 3)
         {
-            char c1 = cards.Distinct().First();
-            char c2 = cards.Distinct().ElementAt(1);
-            char c3 = cards.Distinct().ElementAt(2);
+            char[] cs = new char[3];
+            cs[0] = cards.Distinct().First();
+            cs[1]  = cards.Distinct().ElementAt(1);
+            cs[2] = cards.Distinct().ElementAt(2);
 
             List<int> counts = new List<int>();
-            counts.Add(cards.Count(o => o == c1));
-            counts.Add(cards.Count(o => o == c2));
-            counts.Add(cards.Count(o => o == c3));
+            counts.Add(cards.Count(o => o == cs[0]));
+            counts.Add(cards.Count(o => o == cs[1]));
+            counts.Add(cards.Count(o => o == cs[2]));
+
 
             if(counts.Any(o => o == 3)) handVal = HandVal.Three;
             else handVal = HandVal.tPair;
@@ -66,6 +88,7 @@ public class Hand : IComparable<Hand>
         {
             handVal = HandVal.HC;
         }
+        return handVal;
     }
 
     public int CompareTo(Hand? other)
@@ -92,7 +115,7 @@ public class Hand : IComparable<Hand>
         else
         {
             if (c == 'T') return 10;
-            if (c == 'J') return 11;
+            if (c == 'J') return 1;
             if (c == 'Q') return 12;
             if (c == 'K') return 13;
             if (c == 'A') return 14;
