@@ -4,7 +4,7 @@
     {
         string[] strings = File.ReadAllLines(@"C:\Users\jamin\OneDrive\Dokumente\AdventOfCode\9.txt");
         List<int[]> inputs = new List<int[]>();
-       // inputs.Add(new[] { 10, 13, 16, 21, 30, 45 });
+      // inputs.Add(new[] { 10, 13, 16, 21, 30, 45 });
         foreach (string s in strings)
         {
             string[] numstrings = s.Split(' ');
@@ -37,8 +37,8 @@
         int newNum = 0;
         for (int i = inputAr.Length-1; i >= 0; i--)
         {
-            int numBefore = inputAr[i ][inputAr[i ].Length - 1];
-            newNum = newNum + numBefore;
+            int numBefore = inputAr[i ][0];
+            newNum =numBefore - newNum;
 
 
         }
