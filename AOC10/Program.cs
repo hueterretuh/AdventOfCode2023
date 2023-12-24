@@ -18,6 +18,26 @@
             }
             
         }
+
+        for(int y = 0; y < strings.Length; y++)
+        {
+            for (int x = 0; x < strings[y].Length; x++)
+            {
+                Tile tile = tileMap[x, y];
+                if(tile != null)
+                {
+                    if (tile.HasTop && y == 0) tile = null;
+                    else if (tile.HasBottom && y == tileMap.GetLength(1) - 1) tile =null;
+                    else if (tile.HasLeft && x == 0) tile = null;
+                    else if (tile.HasRight && x == tileMap.GetLength(0) - 1) tile = null;
+                    else if (tile.HasRight && (tileMap[x + 1, y] == null || !tileMap[x + 1, y].HasLeft)) tile = null;
+                    else if (tile.HasLeft && (tileMap[x-1,y] == null || !tileMap[x-1, y].HasRight)) tile = null;
+                    else if (tile.HasTop && (tileMap[x,y-1] == null || !tileMap[x,y-1].HasBottom )) tile = null;
+                    else if(tile.HasBottom && (tileMap[x,y+1] == null || !tileMap[x,y+1].HasTop)) tile = null;
+                }
+            }
+
+        }
     }
 
 
@@ -40,6 +60,11 @@ public class Tile
     public List<Tile> Connections { get; set; }
 
     public bool HasTop { get { return symb == '|' || symb == 'L' || symb == 'J' || symb == 'S'; } }
+
+    public bool HasBottom { get { return symb == '|' || symb == 'S' || symb == '7' || symb == 'F'; } }
+    public bool HasLeft { get { return symb == 'S' || symb == '7' || symb == '-' || symb == 'J'; } }
+
+    public bool HasRight { get { return symb == 'S' || symb == '-' || symb == 'L' || symb == 'F'; } }
 
 
 }
