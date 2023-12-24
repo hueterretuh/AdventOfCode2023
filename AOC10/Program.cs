@@ -2,7 +2,7 @@
 {
     private static void Main(string[] args)
     {
-        string[] strings = File.ReadAllLines(@"C:\Users\jamin\OneDrive\Dokumente\AdventOfCode\9.txt");
+        string[] strings = File.ReadAllLines(@"C:\Users\nurah\Desktop\AOC10.txt");
         Tile[,] tileMap = new Tile[strings[0].Length,strings.Length];
 
         for (int y = 0; y < strings.Length; y++)
@@ -18,26 +18,63 @@
             }
             
         }
-
-        for(int y = 0; y < strings.Length; y++)
+        int nothingCounter;// = tileMap.Cast<Tile>().Count(o => o == null);
+        do
         {
+             nothingCounter = tileMap.Cast<Tile>().Count(o => o == null);
+
+            for (int y = 0; y < strings.Length; y++)
+            {
+                for (int x = 0; x < strings[y].Length; x++)
+                {
+                    Tile tile = tileMap[x, y];
+                    if (tile != null && tile.symb != 'S')
+                    {
+
+                        if (tile.HasTop && y == 0) tileMap[x, y] = null;
+                        else if (tile.HasBottom && y == tileMap.GetLength(1) - 1) tileMap[x, y] = null;
+                        else if (tile.HasLeft && x == 0) tileMap[x, y] = null;
+                        else if (tile.HasRight && x == tileMap.GetLength(0) - 1) tileMap[x, y] = null;
+                        else if (tile.HasRight && (tileMap[x + 1, y] == null || !tileMap[x + 1, y].HasLeft)) tileMap[x, y] = null;
+                        else if (tile.HasLeft && (tileMap[x - 1, y] == null || !tileMap[x - 1, y].HasRight)) tileMap[x, y] = null;
+                        else if (tile.HasTop && (tileMap[x, y - 1] == null || !tileMap[x, y - 1].HasBottom)) tileMap[x, y] = null;
+                        else if (tile.HasBottom && (tileMap[x, y + 1] == null || !tileMap[x, y + 1].HasTop)) tileMap[x, y] = null;
+
+                    }
+                }
+            }
+            Console.WriteLine(nothingCounter.ToString());
+
+        } while (tileMap.Cast<Tile>().Count(o => o == null) != nothingCounter);
+
+        for (int y = 0; y < strings.Length; y++)
+        {
+            string line = "";
             for (int x = 0; x < strings[y].Length; x++)
             {
                 Tile tile = tileMap[x, y];
-                if(tile != null)
+                if (tile != null)
                 {
-                    if (tile.HasTop && y == 0) tile = null;
-                    else if (tile.HasBottom && y == tileMap.GetLength(1) - 1) tile =null;
-                    else if (tile.HasLeft && x == 0) tile = null;
-                    else if (tile.HasRight && x == tileMap.GetLength(0) - 1) tile = null;
-                    else if (tile.HasRight && (tileMap[x + 1, y] == null || !tileMap[x + 1, y].HasLeft)) tile = null;
-                    else if (tile.HasLeft && (tileMap[x-1,y] == null || !tileMap[x-1, y].HasRight)) tile = null;
-                    else if (tile.HasTop && (tileMap[x,y-1] == null || !tileMap[x,y-1].HasBottom )) tile = null;
-                    else if(tile.HasBottom && (tileMap[x,y+1] == null || !tileMap[x,y+1].HasTop)) tile = null;
+                    line += tile.symb;
+                }
+                else
+                {
+                    line += " ";
                 }
             }
-
+            Console.WriteLine(line);
         }
+        
+        foreach ( Tile tile in tileMap)
+        {
+            if (tile != null)
+            {
+                tile.SetConnections(tileMap);
+            }
+        }
+        Console.WriteLine(tileMap.Cast<Tile>().Where(o => o != null && o.Connections.Count != 2).Count() + "/" + tileMap.Cast<Tile>().Count(o => o != null));
+        Tile start = tileMap.Cast<Tile>().First(o => o.symb == 'S');
+        
     }
 
 
@@ -67,4 +104,15 @@ public class Tile
     public bool HasRight { get { return symb == 'S' || symb == '-' || symb == 'L' || symb == 'F'; } }
 
 
+    public void SetConnections(Tile[,] tiles)
+    {
+        var neighbors = tiles.Cast<Tile>().Where(o => o != null  && (Math.Abs(o.x - x)  +Math.Abs( o.y - y) ) == 1);
+       Connections = neighbors.Where(o =>
+
+            HasRight && o.HasLeft ||
+            HasLeft && o.HasRight ||
+            HasTop && o.HasBottom ||
+            HasBottom && o.HasTop
+        ).ToList();
+    }
 }

@@ -11,7 +11,8 @@ internal class Program
 
 
         Stopwatch sw = Stopwatch.StartNew();
-       string[] strings = File.ReadAllLines(@"C:\Users\jamin\OneDrive\Dokumente\AdventOfCode\AdventOfCode1.txt");
+        //string[] strings = File.ReadAllLines(@"C:\Users\jamin\OneDrive\Dokumente\AdventOfCode\AdventOfCode1.txt");
+        string[] strings = File.ReadAllLines(@"C:\Users\nurah\Desktop\AOC10.txt");
         int result = 0;
         foreach (string s in strings)
         {
