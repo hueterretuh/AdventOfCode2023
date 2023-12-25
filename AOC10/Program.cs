@@ -2,26 +2,26 @@
 {
     private static void Main(string[] args)
     {
-        string[] strings = File.ReadAllLines(@"C:\Users\nurah\Desktop\AOC10.txt");
-        Tile[,] tileMap = new Tile[strings[0].Length,strings.Length];
+        string[] strings = File.ReadAllLines(@"C:\Users\jamin\OneDrive\Dokumente\AdventOfCode\10.txt");
+        Tile[,] tileMap = new Tile[strings[0].Length, strings.Length];
 
         for (int y = 0; y < strings.Length; y++)
         {
-            for(int x = 0; x < strings[y].Length; x++)
+            for (int x = 0; x < strings[y].Length; x++)
             {
                 char c = strings[y][x];
-                if(c != '.')
+                if (c != '.')
                 {
-                    tileMap[x, y] = new Tile(x, y,c);
+                    tileMap[x, y] = new Tile(x, y, c);
 
                 }
             }
-            
+
         }
         int nothingCounter;// = tileMap.Cast<Tile>().Count(o => o == null);
         do
         {
-             nothingCounter = tileMap.Cast<Tile>().Count(o => o == null);
+            nothingCounter = tileMap.Cast<Tile>().Count(o => o == null);
 
             for (int y = 0; y < strings.Length; y++)
             {
@@ -64,19 +64,37 @@
             }
             Console.WriteLine(line);
         }
-        
-        foreach ( Tile tile in tileMap)
+
+        Parallel.ForEach<Tile>(tileMap.Cast<Tile>(), tile =>
         {
             if (tile != null)
             {
                 tile.SetConnections(tileMap);
             }
-        }
+        });
         Console.WriteLine(tileMap.Cast<Tile>().Where(o => o != null && o.Connections.Count != 2).Count() + "/" + tileMap.Cast<Tile>().Count(o => o != null));
-        Tile start = tileMap.Cast<Tile>().First(o => o.symb == 'S');
         
+        Tile start = tileMap.Cast<Tile>().First(o => o?.symb == 'S');
+
+        Tile temp = start;
+        Tile prev = start.Connections.First();
+        Tile next = start.Connections.First();
+        int counter = 1;
+        do
+        {
+            temp = next;
+            next = next.GetNext(prev);
+            prev = temp;
+            counter++;
+        } while (next.symb != 'S');
+    
+        Console.WriteLine(counter/2);
+
+
     }
 
+        
+       
 
 }
 
@@ -109,10 +127,15 @@ public class Tile
         var neighbors = tiles.Cast<Tile>().Where(o => o != null  && (Math.Abs(o.x - x)  +Math.Abs( o.y - y) ) == 1);
        Connections = neighbors.Where(o =>
 
-            HasRight && o.HasLeft ||
-            HasLeft && o.HasRight ||
-            HasTop && o.HasBottom ||
-            HasBottom && o.HasTop
+            HasRight && o.HasLeft && o.x == x+1||
+            HasLeft && o.HasRight && o.x == x-1||
+            HasTop && o.HasBottom && o.y == y-1||
+            HasBottom && o.HasTop && o.y == y+1
         ).ToList();
+    }
+
+    public Tile GetNext(Tile from)
+    {
+        return Connections.First(o => o != from);
     }
 }
