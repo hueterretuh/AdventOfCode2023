@@ -8,25 +8,22 @@ internal class Program
         List<string> stringList = new List<string>();
         stringList.AddRange(input);
 
+        List<int> emptyCols = new List<int>();
+        List<int> emptyRows = new List<int>();
 
-        int inserted = 0;
+      //  int inserted = 0;
         for (int i = 0; i < input.Count; i++)
         {
             string? item = input[i];
             if (!item.Contains('#')){
-                stringList.Insert(i + inserted++ , new string('.', item.Length));
+               emptyRows.Add(i);
             }
         }
-        inserted = 0;
+     //   inserted = 0;
         for(int i = 0;i < input[0].Length ;i++)
         {
             if(input.All(o => o[i] == '.')){
-                for (int i1 = 0; i1 < stringList.Count; i1++)
-                {
-
-                    stringList[i1] = stringList[i1].Insert(i + inserted, ".");
-                }
-                inserted++;
+               emptyCols.Add(i);
             }
         }
 
@@ -54,8 +51,18 @@ internal class Program
 
             for(int j = i +1; j< stars.Count; j++)
             {
-                result += Math.Abs( stars[i][1] - stars[j][1]) + Math.Abs(stars[i][2] - stars[j][2]);
+                int[] xs = { stars[i][1], stars[j][1] };
+                int[] ys = { stars[i][2], stars[j][2] };
+                int x1 = xs.Min();
+                int x2 = xs.Max();
+                int y1 = ys.Min();
+                int y2 = ys.Max();
 
+                long offset = 0;
+                if (x1 != x2) offset += emptyCols.Where(x => x > x1 && x < x2).Count() * 999999;
+                if (y1 != y2) offset += emptyRows.Where(y => y > y1 && y < y2).Count() * 999999;
+                result += Math.Abs( x1 - x2) + Math.Abs(y1 - y2);
+                result += offset;
           //      Console.WriteLine(i + "," + j);
             }
         }
