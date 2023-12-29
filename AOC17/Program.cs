@@ -42,9 +42,9 @@ internal class Program
             {
                 Console.WriteLine("WTF");
             }
-        }while(reses == null || !reses.Any(o => o.x == input.GetLength(0)-1 && o.y == input.GetLength(1)-1));
+        }while(reses == null || !reses.Any(o => o.x == input.GetLength(0)-1 && o.y == input.GetLength(1)-1 && o.line >= 4));
 
-        Console.WriteLine(sorted.First(o => o.x == input.GetLength(0) - 1 && o.y == input.GetLength(1) - 1).cost);
+        Console.WriteLine(sorted.First(o => o.x == input.GetLength(0) - 1 && o.y == input.GetLength(1) - 1 && o.line >= 4).cost);
     }
 
     private static List<Search> GetNext(Search search)
@@ -121,8 +121,9 @@ public class Search : IComparable<Search>
     {
         if(direction == Direction.Right) return null;
         if (x == 0) return null;
-        if (direction == Direction.Left && line == 3) return null;
-       
+        if (direction == Direction.Left && line == 10) return null;
+        if (direction != Direction.None && direction != Direction.Left && line < 4) return null;
+
         Search NewSearch =  new Search(x - 1, y, direction == Direction.Left ? line + 1 : 1, cost + input[x - 1, y],Direction.Left, input, Path);
         if(!Path.Any(o => o.x == NewSearch.x && o.y == NewSearch.y)) return NewSearch;
         return null;
@@ -132,7 +133,8 @@ public class Search : IComparable<Search>
     {
         if (direction == Direction.Left) return null;
         if (x == input.GetLength(0) -1) return null;
-        if (direction == Direction.Right && line == 3) return null;
+        if (direction == Direction.Right && line == 10) return null;
+        if (direction != Direction.None && direction != Direction.Right && line < 4) return null;
         Search NewSearch = new Search(x + 1, y, direction == Direction.Right ? line + 1 : 1, cost + input[x + 1, y],Direction.Right, input, Path);
         if (!Path.Any(o => o.x == NewSearch.x && o.y == NewSearch.y)) return NewSearch;
         return null;
@@ -142,7 +144,8 @@ public class Search : IComparable<Search>
     {
         if (direction == Direction.Down) return null;
         if (y == 0) return null;
-        if (direction == Direction.Up && line == 3) return null;
+        if (direction == Direction.Up && line == 10) return null;
+        if (direction != Direction.None && direction != Direction.Up && line < 4) return null;
         Search NewSearch = new Search(x , y-1, direction == Direction.Up ? line + 1 : 1, cost + input[x , y-1],Direction.Up, input,Path);
         if (!Path.Any(o => o.x == NewSearch.x && o.y == NewSearch.y)) return NewSearch;
         return null;
@@ -152,7 +155,8 @@ public class Search : IComparable<Search>
     {
         if (direction == Direction.Up) return null;
         if (y == input.GetLength(1)-1) return null;
-        if (direction == Direction.Down && line == 3) return null;
+        if (direction == Direction.Down && line == 10) return null;
+        if (direction != Direction.None && direction != Direction.Down && line < 4) return null;
         Search NewSearch =  new Search(x, y + 1, direction == Direction.Down ? line + 1 : 1, cost + input[x, y + 1],Direction.Down, input, Path);
         if (!Path.Any(o => o.x == NewSearch.x && o.y == NewSearch.y)) return NewSearch;
         return null;
