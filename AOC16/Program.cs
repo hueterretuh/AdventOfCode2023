@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.VisualBasic;
+using System.Collections.Generic;
 using static System.Net.Mime.MediaTypeNames;
 
 internal class Program
@@ -11,12 +12,11 @@ internal class Program
     {
         string[] strings = File.ReadAllLines(@"C:\Users\jamin\OneDrive\Dokumente\AdventOfCode\16.txt");
         input = new char[strings[0].Length, strings.Length];
-        output = new char[strings[0].Length, strings.Length];
+     //   output = new char[strings[0].Length, strings.Length];
         visited = new bool[strings[0].Length, strings.Length];
 
 
-
-        for (int i = 0; i < strings.Length; i++)
+        for (int i = 0; i < input.GetLength(1); i++)
         {
             string s = strings[i];
             for (int i1 = 0; i1 < s.Length; i1++)
@@ -26,9 +26,50 @@ internal class Program
                 //output[i1, i1] = c;
             }
         }
-        Array.Copy(input, output, input.LongLength);
+        int res = 0;
+        for(int i = 0;i < input.GetLength(0); i++) {
+
+            int tempres = getTileCount(i,0,Direction.Down);
+            int tempres2 = getTileCount(i,input.GetLength(1)-1,Direction.Up);
+
+            if(tempres > res) { res = tempres; }
+            if (tempres2 > res) { res = tempres2; }
+        }
+
+        for (int i = 0; i < input.GetLength(1); i++)
+        {
+
+            int tempres = getTileCount(0, i, Direction.Right);
+            int tempres2 = getTileCount(input.GetLength(0) -1,  i, Direction.Left);
+
+            if (tempres > res) { res = tempres; }
+            if (tempres2 > res) { res = tempres2; }
+        }
+        /*
+        for (int y = 0; y < visited.GetLength(1); y++)
+        {
+            for (int x = 0; x < visited.GetLength(0); x++)
+
+            {
+                Console.Write(output[x, y]);
+            }
+            Console.WriteLine();
+
+
+        }
+        */
+        Console.WriteLine(res);
+    }
+
+    private static int getTileCount(int x,int y,Direction direction)
+    {
+        output = new char[input.GetLength(0), input.GetLength(1)];
+        visited = new bool[input.GetLength(0), input.GetLength(1)];
+        cache.Clear();
+
+
         List<Tuple<int[], Direction>> moves = new List<Tuple<int[], Direction>>();
-        Tuple<int[], Direction> nextMove = new Tuple<int[], Direction>(new[] { 0, 0 }, Direction.Right);
+        Tuple<int[], Direction> nextMove = new Tuple<int[], Direction>(new[] { x, y }, direction);
         moves.Add(nextMove);
         do
         {
@@ -42,23 +83,8 @@ internal class Program
             moves = nextMoves;
         }
         while (moves.Count > 0);
-        int res = visited.Cast<bool>().Count(o => o);
-        for (int y = 0; y < visited.GetLength(1); y++)
-        {
-            for (int x = 0; x < visited.GetLength(0); x++)
-
-            {
-                Console.Write(output[x, y] );
-            }
-            Console.WriteLine();
-
-    
-        }
-        
-        Console.WriteLine(res);
-        }
-
-
+        return  visited.Cast<bool>().Count(o => o);
+    }
     enum Direction
     {
         Right,
