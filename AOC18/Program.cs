@@ -4,137 +4,127 @@ using System.Runtime.CompilerServices;
 
 internal class Program
 {
-    static int[,] map;
+    private static bool ClockWise = false;
     private static void Main(string[] args)
     {
-        map = new int[500, 500];
+     
+
         string[] strings = File.ReadAllLines(@"C:\Users\jamin\OneDrive\Dokumente\AdventOfCode\18.txt");
-        List<Instruction> instructions = new List<Instruction>();
-        List<int[]> XY = new List<int[]>();
+        List<Line> instructions = new List<Line>();
+        List<long[]> XY = new List<long[]>();
 
         
         foreach (string s in strings)
         {
-            instructions.Add(new Instruction(s));
+            instructions.Add(new Line(s));
         }
 
-        int X = 100;
-        int Y = 400;
-        map[X, Y] = 2;
+        long X = 0;
+        long Y = 0;
 
-        foreach (Instruction instruction in instructions)
+     //   XY.Add(new[] { X, Y });
+
+        foreach (Line instruction in instructions)
         {
 
-            
-                for (int i = 0; i < instruction.Length; i++)
-                {
-                    if (instruction.direction == Instruction.Direction.Left) X--;
-                    else if (instruction.direction == Instruction.Direction.Right) X++;
-                    else if (instruction.direction == Instruction.Direction.Up) Y--;
-                    else Y++;
-                    XY.Add(new []{ X,Y});
-                    map[X, Y] = 2;
-        
-                }
-            
-        }
-
-        for (int j = 0; j < map.GetLength(1); j++)
-        {
-
-            for (int i = 0; i < map.GetLength(0); i++)
+            if (instruction.direction == Line.Direction.Left)
             {
-                Console.Write(map[i, j]);
+                instruction.XStart = X ;
+                instruction.YStart = Y;
+                X -= (instruction.Length );
             }
-            Console.WriteLine();
-        }
-        for (int j = 0; j < map.GetLength(1); j++)
-        {
-
-            for (int i = 0; i < map.GetLength(0); i++)
+            else if (instruction.direction == Line.Direction.Right)
             {
-                if ((map[i,j] != 2))
-                {
-                    List<int[]> path = new List<int[]>();
-                    List<int[]> ToCheck = new List<int[]>();
-                    Tuple<bool?,List<int[]> > res = CanGetOut(i,j, path,ToCheck);
-                 
-                    if (res.Item2 != null && res.Item2.Count > 0) ToCheck.AddRange(res.Item2);
-
-                    while(res.Item1 == null && ToCheck.Count > 0)
-                    {
-                      res= CanGetOut(ToCheck.First()[0], ToCheck.First()[1], path,ToCheck);
-                        ToCheck.Remove(ToCheck.First());
-                        if (res.Item2 != null && res.Item2.Count > 0)
-                        {
-                            foreach (int[] newItem in res.Item2)
-                            {
-                             if(!ToCheck.Any(o => o[0] == newItem[0] && o[1] == newItem[1]))   ToCheck.Add(newItem);
-                            }
-                        }
-                    }
-                    if (!res.Item1.HasValue)
-                    {
-                        Console.WriteLine(i +";" + j);
-                    }
-                    bool canOut = res.Item1.HasValue ? res.Item1.Value : false ;
-
-                    foreach (int[] xy in path)
-                    {
-                        map[i,j] = canOut ? 3 : 1;
-                    }
-
-
-                }
+                instruction.XStart = X ;
+                instruction.YStart = Y;
+                X += instruction.Length ;
             }
-
-        }
-
-        for (int j = 0; j < map.GetLength(1); j++)
-        {
-
-            for (int i = 0; i < map.GetLength(0); i++)
+            else if (instruction.direction == Line.Direction.Up)
             {
-                Console.Write(map[i,j]);
-              }
-            Console.WriteLine();
-        }
-        
+                instruction.XStart = X;
+                instruction.YStart = Y ;
+                Y -= (instruction.Length );
+            }
+            else
+            {
+                instruction.XStart = X;
+                instruction.YStart = Y;
+                Y += instruction.Length ;
+            }
+            XY.Add(new[] { X, Y });
+            instruction.XEnd = X;
+            instruction.YEnd = Y;
 
-        Console.WriteLine();
+        }
+
+        int Winkel = 0;
+
+        for(int i = 1; i < instructions.Count; i++)
+        {
+            Winkel += Math.Sign(instructions[i - 1].CrossProduct(instructions[i]));
+        }
+
+        Console.WriteLine(Winkel);
+        if (Winkel > 0) ClockWise = true; else ClockWise = false;
+
+
+
+        Int128 result =  instructions.Sum(o => o.Length)  ;
+
+
+        
+        for(int i= 1; i < XY.Count-1; i++)
+        {
+            result += XY[i][0] * (XY[i + 1][1] - XY[i-1][1]);
+        }
+        result += XY[0][0] * (XY[1][1] - XY[XY.Count - 1][1] );
+        result += XY[XY.Count-1][0] * (XY[0][1] - XY[XY.Count - 2][1] );
+        result /= 2;
+        result += ClockWise ? 1 : -1;
+        Console.WriteLine (result);
         Console.WriteLine(XY.Min(o => o[0]) + ";" + XY.Max(o => o[0]));
         Console.WriteLine(XY.Min(o => o[1]) + ";" + XY.Max(o => o[1]));
-        Console.WriteLine(map.Cast<int>().Count(o => o == 2 || o == 1).ToString());
+
         
-    }
-
-
-    private static Tuple<bool?, List<int[]>>CanGetOut(int x, int y, List<int[]> path, List<int[]> ToCheck)
-    {
-      //  if(ToCheck.Any(o => o[0] == x && o[1] == y)) return new Tuple<bool?, List<int[]>> ( null, null );
-        path.Add(new[] { x, y });
-        if (x <= 0 || y <= 0 || x >= map.GetLength(0) - 1 || y >= map.GetLength(1)-1) return new Tuple<bool?, List<int[]>>(true,null);
-        if (map[x - 1, y] == 1 || map[x, y - 1] == 1 || map[x + 1, y] == 1 || map[x, y + 1] == 1) return new Tuple<bool?, List<int[]>>(false, null);
-        if (map[x - 1, y] == 3 || map[x, y - 1] == 3 || map[x + 1, y] == 3 || map[x, y + 1] == 3) return new Tuple<bool?, List<int[]>>(true, null);
-
-        List<int[]> toCheck = new List<int[]>();
-        if (map[x-1,y] != 2 && !path.Any(o => o[0] == x-1 && o[1] == y)) toCheck.Add(new[] { x - 1, y });
-        if (map[x +1, y] != 2 && !path.Any(o => o[0] == x + 1 && o[1] == y)) toCheck.Add(new[] { x + 1, y });
-        if (map[x , y-1] != 2 && !path.Any(o => o[0] == x  && o[1] == y -1)) toCheck.Add(new[] { x, y - 1 });
-        if (map[x, y + 1] != 2 && !path.Any(o => o[0] == x  && o[1] == y+1)) toCheck.Add(new[] { x, y + 1 });
-        return new Tuple<bool?, List<int[]>>(null,toCheck);
     }
 }
 
     
-public class Instruction
+public class Line
 {
    public Direction direction {  get; set; }
     public int Length { get; set; }
-    public int Color { get; set; }
 
-    public Instruction(string input)
+    public long XStart {get; set;}
+    public long XEnd { get; set;}
+    public long YStart { get; set;}
+    public long YEnd { get; set;}
+    
+    public long[] Vektor { 
+        get {
+            long XDif = XEnd - XStart;
+            if (XDif < 0) XDif--;
+            else if(XDif > 0) XDif++;
+            long YDif = YEnd - YStart;
+            if (YDif < 0) YDif--;
+            else if (YDif > 0) YDif++;
+            return  new[] { XDif ,YDif }; 
+        } }
+    
+    public Line(string input)
     {
+        
+        var inp = input.Split(' ');
+        string hex = inp[2].Replace("#", "0x").Replace("(", "").Replace(")", "");
+        char directionChar = hex[hex.Length - 1];
+        if (directionChar == '1') direction = Direction.Down;
+        else if (directionChar == '2') direction = Direction.Left;
+        else if (directionChar == '0') direction = Direction.Right;
+        else direction = Direction.Up;
+
+        Length = Convert.ToInt32(hex.Substring(0,hex.Length-1),16);
+                
+        /*
         var inp = input.Split(' ');
         if (inp[0] == "D") direction = Direction.Down;
         else if (inp[0] == "L") direction = Direction.Left;
@@ -142,16 +132,64 @@ public class Instruction
         else direction = Direction.Up;
 
         Length = int.Parse(inp[1]);
-
-        Color = Convert.ToInt32(inp[2].Replace("#", "0x").Replace("(","").Replace(")",""),16);
+        */
+        }
+    public Line(int XStart,int XEnd,int YStart,int YEnd,Direction direction)
+    {
+        this.XStart = XStart;
+        this.XEnd = XEnd;
+        this.YEnd = YEnd;
+        this.YStart = YStart;
+        this.direction = direction;
     }
-    public Instruction(Direction direction, int length, int color)
+    /*
+    public List<Line> Divide(List<Line> lines)
+    {
+        if (Vektor[1] ==0) return new List<Line>() { this };
+        List<Line> result = new List<Line>();
+      //  var crosses = lines.Where(o => o.Vektor[1] >= 0   && o.YStart >= YStart && o.YStart <= YEnd || o.YEnd >= YStart && o.YEnd <= YEnd || o.YEnd <= YStart && o.YStart >= YEnd).OrderBy(o => o.YEnd);
+
+        List<int> Ys = lines.Where(o => o.Vektor[1] != 0).Select(o => o.YEnd).ToList();
+       // Ys.AddRange(lines.Select(o => o.YStart));
+        if (Vektor[1] < 0) Ys = Ys.Where(o => o <= YStart && o >= YEnd).Distinct().OrderByDescending(o => o).ToList();
+        else if (Vektor[1] > 0) Ys = Ys.Where(o => o <= YEnd && o >= YStart).Distinct().OrderBy(o => o).ToList();
+
+        int curY = YStart;
+       
+        foreach(int y in Ys)
+        {
+            if (Vektor[1] > 0) result.Add(new Line(XStart, XEnd, curY, y - 1,direction));
+            else result.Add(new Line(XStart, XEnd, curY, y + 1, direction));
+            curY = y;
+        }
+        result.Add(new Line(XStart,XEnd,curY,YEnd, direction));
+
+        return result;
+    }
+
+    public long GetArea(List<Line> lines , bool clockWise)
+    {
+        if (Vektor[1] ==0)  return 0; 
+        if ( !clockWise && Vektor[1]  >= 0) return 0;
+        if( clockWise && Vektor[1] <= 0) return 0;
+        var equals = lines.Where(o => o != this && o.Vektor[1] != 0 && (o.XEnd > XEnd && !clockWise || o.XEnd < XEnd && clockWise) && (o.YStart == YStart || o.YStart == YEnd));//( (o.YStart == YEnd && o.YEnd == YStart) || (o.YEnd == YEnd && o.YStart == YStart) ));
+        Line wall = equals.OrderBy(o => Math.Abs(XEnd - o.XEnd)).FirstOrDefault();
+        if (lines.Any(o => o.Vektor[1] == 0 && (o.YStart == YStart || o.YStart == YEnd) && ((o.XStart == XStart + (clockWise ? -1 : 1) || o.XEnd == XEnd + (clockWise ? 1 : -1))))) return 0;
+        if(wall == null) return 0;
+        return Math.Abs(Vektor[1]) * (Math.Abs(XEnd - wall.XEnd)-1);
+    }
+    */
+    public Line(Direction direction, int length)
     {
         this.direction = direction;
         Length = length;
-        Color = color;
-    }
 
+    }
+    public long CrossProduct(Line line)
+    {
+        return Vektor[0] * line.Vektor[1] - line.Vektor[0] * Vektor[1];
+            
+    }
     public enum Direction
     {
         Left,
