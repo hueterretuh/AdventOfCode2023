@@ -6,6 +6,7 @@ internal class Program
     private static void Main(string[] args)
     {
         string[] strings = File.ReadAllLines(@"C:\Users\jamin\OneDrive\Dokumente\AdventOfCode\19.txt");
+        
 
         List<Rule> rules = new List<Rule>();
         int i = 0;
