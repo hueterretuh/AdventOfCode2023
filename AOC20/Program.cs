@@ -184,6 +184,7 @@ public class Output : Device
 
     public override List<Signal> GetInput(bool High, Device Sender)
     {
+      
         return new List<Signal>();
     }
 }
